@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Royal Texas Hold'em</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- TOP HEADER BAR -->
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-suit">♠</span>
+      <span class="brand-title">ROYAL HOLD'EM</span>
+      <span id="table-mode-badge" class="mode-badge">1x1 • MÉDIO</span>
+    </div>
+
+    <div class="header-actions">
+      <button id="btn-log-toggle" class="icon-btn" title="Histórico / Log">
+        <span class="btn-icon">📜</span>
+        <span id="lbl-log-btn" class="btn-label">Histórico</span>
+      </button>
+      <button id="btn-rankings" class="icon-btn" title="Ranking de Mãos">
+        <span class="btn-icon">🏆</span>
+        <span id="lbl-rankings-btn" class="btn-label">Ranking</span>
+      </button>
+      <button id="btn-sound" class="icon-btn" title="Som / Sound">
+        <span id="sound-icon" class="btn-icon">🔊</span>
+      </button>
+      <button id="btn-open-menu" class="icon-btn primary-outline">
+        <span class="btn-icon">☰</span>
+        <span id="lbl-menu-btn" class="btn-label">Menu</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN POKER ARENA -->
+  <main class="arena">
+    <div id="poker-table" class="poker-table">
+      <!-- FELT DECORATION -->
+      <div class="felt-inner-ring"></div>
+      <div class="felt-watermark">
+        <div class="watermark-title">TEXAS HOLD'EM</div>
+        <div id="blinds-display" class="watermark-sub">BLINDS 10 / 20</div>
+      </div>
+
+      <!-- PHYSICAL DECK PILE -->
+      <div id="deck-pile" class="deck-pile" aria-hidden="true">
+        <div class="deck-card layer-3"></div>
+        <div class="deck-card layer-2"></div>
+        <div class="deck-card layer-1"></div>
+      </div>
+
+      <!-- SLIDING DEALER BUTTON -->
+      <div id="dealer-btn" class="dealer-button" title="Dealer">D</div>
+
+      <!-- CENTER POT & COMMUNITY CARDS -->
+      <div class="table-center">
+        <div class="pot-container">
+          <div class="pot-pill">
+            <span class="pot-chip-icon">🪙</span>
+            <span id="lbl-pot" class="pot-label">POTE</span>
+            <span id="pot-amount" class="pot-value">0</span>
+          </div>
+          <div id="side-pots-display" class="side-pots-list"></div>
+        </div>
+
+        <div id="community-cards" class="community-cards">
+          <div class="board-slot" data-slot="0"></div>
+          <div class="board-slot" data-slot="1"></div>
+          <div class="board-slot" data-slot="2"></div>
+          <div class="board-slot" data-slot="3"></div>
+          <div class="board-slot" data-slot="4"></div>
+        </div>
+
+        <div id="phase-banner" class="phase-banner">PRÉ-FLOP</div>
+      </div>
+
+      <!-- SEAT 1: TOP CPU (Used in both 1x1 and 4x1) -->
+      <div id="seat-1" class="seat seat-top" data-seat="1">
+        <div class="seat-cards" id="cards-1"></div>
+        <div class="seat-box">
+          <div class="seat-header">
+            <span class="seat-name" id="name-1">CPU 1</span>
+            <span class="seat-role-badge" id="role-1"></span>
+          </div>
+          <div class="seat-stack" id="stack-1">1.000</div>
+          <div class="seat-action-bubble" id="bubble-1"></div>
+        </div>
+        <div class="seat-bet-pill hidden" id="bet-1">0</div>
+      </div>
+
+      <!-- SEAT 2: RIGHT CPU (Used in 4x1) -->
+      <div id="seat-2" class="seat seat-right hidden-seat" data-seat="2">
+        <div class="seat-cards" id="cards-2"></div>
+        <div class="seat-box">
+          <div class="seat-header">
+            <span class="seat-name" id="name-2">CPU 2</span>
+            <span class="seat-role-badge" id="role-2"></span>
+          </div>
+          <div class="seat-stack" id="stack-2">1.000</div>
+          <div class="seat-action-bubble" id="bubble-2"></div>
+        </div>
+        <div class="seat-bet-pill hidden" id="bet-2">0</div>
+      </div>
+
+      <!-- SEAT 3: LEFT CPU (Used in 4x1) -->
+      <div id="seat-3" class="seat seat-left hidden-seat" data-seat="3">
+        <div class="seat-cards" id="cards-3"></div>
+        <div class="seat-box">
+          <div class="seat-header">
+            <span class="seat-name" id="name-3">CPU 3</span>
+            <span class="seat-role-badge" id="role-3"></span>
+          </div>
+          <div class="seat-stack" id="stack-3">1.000</div>
+          <div class="seat-action-bubble" id="bubble-3"></div>
+        </div>
+        <div class="seat-bet-pill hidden" id="bet-3">0</div>
+      </div>
+
+      <!-- SEAT 0: HUMAN PLAYER (Bottom) -->
+      <div id="seat-0" class="seat seat-bottom" data-seat="0">
+        <div class="seat-bet-pill hidden" id="bet-0">0</div>
+        <div id="player-hand-rank" class="hand-rank-badge">—</div>
+        <div class="seat-cards player-cards" id="cards-0"></div>
+        <div class="seat-box player-box">
+          <div class="seat-header">
+            <span class="seat-name" id="name-0">Você</span>
+            <span class="seat-role-badge" id="role-0"></span>
+          </div>
+          <div class="seat-stack" id="stack-0">1.000</div>
+          <div class="seat-action-bubble" id="bubble-0"></div>
+        </div>
+      </div>
+
+      <!-- ANIMATION FX LAYER (Flying chips) -->
+      <div id="fx-layer" class="fx-layer"></div>
+
+      <!-- WINNER / ROUND RESULT TOAST -->
+      <div id="round-result-banner" class="round-result-banner hidden">
+        <div id="round-result-title" class="result-title">Você venceu!</div>
+        <div id="round-result-detail" class="result-detail">Dois Pares • +240 fichas</div>
+      </div>
+    </div>
+
+    <!-- COLLAPSIBLE ACTION LOG -->
+    <aside id="log-drawer" class="log-drawer hidden">
+      <div class="log-header">
+        <span id="lbl-log-title">Histórico da Mesa</span>
+        <button id="btn-close-log" class="close-mini-btn">✕</button>
+      </div>
+      <ul id="action-log-list" class="action-log-list"></ul>
+    </aside>
+  </main>
+
+  <!-- PLAYER CONTROLS FOOTER -->
+  <footer id="controls-bar" class="controls-bar">
+    <!-- LIVE STATUS & ACTION GUIDE BUTTON -->
+    <div class="status-strip">
+      <span id="live-status-text" class="live-status-text">Configure sua mesa no menu para começar.</span>
+      <button id="btn-action-help" class="help-diff-btn" type="button">
+        <span>❓</span>
+        <span id="lbl-help-diff-btn">Passar vs Aumentar</span>
+      </button>
+    </div>
+
+    <!-- BETTING & ACTION BUTTONS -->
+    <div id="action-controls-group" class="action-controls-group disabled">
+      <div class="raise-controls">
+        <div class="preset-buttons">
+          <button class="preset-btn" data-preset="min" id="btn-preset-min">Mín</button>
+          <button class="preset-btn" data-preset="half" id="btn-preset-half">1/2 Pote</button>
+          <button class="preset-btn" data-preset="pot" id="btn-preset-pot">Pote</button>
+          <button class="preset-btn" data-preset="allin" id="btn-preset-allin">All-In</button>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="bet-slider" min="20" max="1000" step="10" value="40" />
+          <span id="bet-slider-val" class="slider-val">40</span>
+        </div>
+      </div>
+
+      <div class="main-action-buttons">
+        <button id="btn-fold" class="action-btn btn-fold">Desistir</button>
+        <button id="btn-check-call" class="action-btn btn-call">Passar</button>
+        <button id="btn-bet-raise" class="action-btn btn-raise">Apostar 40</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MAIN SELECTION MENU OVERLAY -->
+  <div id="menu-overlay" class="modal-overlay">
+    <div class="menu-card">
+      <div class="menu-emblem">♠ ♥ ♦ ♣</div>
+      <h1 id="menu-title" class="menu-title">ROYAL TEXAS HOLD'EM</h1>
+      <p id="menu-subtitle" class="menu-subtitle">Configure sua mesa e escolha seus oponentes</p>
+
+      <!-- LANGUAGE SELECTOR -->
+      <div class="menu-group">
+        <label id="lbl-select-lang" class="group-label">Idioma / Language</label>
+        <div class="segmented-grid cols-2" id="lang-selector">
+          <button class="seg-btn active" data-lang="pt">🇧🇷 Português</button>
+          <button class="seg-btn" data-lang="en">🇺🇸 English</button>
+        </div>
+      </div>
+
+      <!-- GAME MODE SELECTOR -->
+      <div class="menu-group">
+        <label id="lbl-select-mode" class="group-label">Tipo de Jogo</label>
+        <div class="segmented-grid cols-2" id="mode-selector">
+          <button class="seg-btn active" data-mode="1v1">
+            <span class="seg-title">1x1</span>
+            <span id="lbl-mode-1v1-desc" class="seg-sub">Duelo Direto (Heads-Up)</span>
+          </button>
+          <button class="seg-btn" data-mode="4v1">
+            <span class="seg-title">4x1</span>
+            <span id="lbl-mode-4v1-desc" class="seg-sub">Você vs 3 CPUs</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- DIFFICULTY SELECTOR -->
+      <div class="menu-group">
+        <label id="lbl-select-diff" class="group-label">Dificuldade da CPU</label>
+        <div class="segmented-grid cols-3" id="diff-selector">
+          <button class="seg-btn" data-diff="easy">
+            <span id="lbl-diff-easy" class="seg-title">Fácil</span>
+            <span id="lbl-diff-easy-sub" class="seg-sub">Casual</span>
+          </button>
+          <button class="seg-btn active" data-diff="medium">
+            <span id="lbl-diff-med" class="seg-title">Médio</span>
+            <span id="lbl-diff-med-sub" class="seg-sub">Tático</span>
+          </button>
+          <button class="seg-btn" data-diff="hard">
+            <span id="lbl-diff-hard" class="seg-title">Difícil</span>
+            <span id="lbl-diff-hard-sub" class="seg-sub">Agressivo</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-footer-btns">
+        <button id="btn-start-game" class="start-game-btn">Iniciar Partida</button>
+        <button id="btn-resume-game" class="resume-game-btn hidden">Continuar Partida Atual</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION DIFFERENCE GUIDE MODAL (? Passar vs Aumentar) -->
+  <div id="help-overlay" class="modal-overlay hidden">
+    <div class="rankings-card">
+      <div class="rankings-header">
+        <h2 id="lbl-help-modal-title">Diferença entre Passar, Pagar e Aumentar</h2>
+        <button id="btn-close-help" class="close-mini-btn">✕</button>
+      </div>
+      <div class="rankings-list">
+        <div id="help-live-context" class="live-context-box"></div>
+        <div id="help-guide-grid" class="guide-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HAND RANKINGS MODAL -->
+  <div id="rankings-overlay" class="modal-overlay hidden">
+    <div class="rankings-card">
+      <div class="rankings-header">
+        <h2 id="lbl-rankings-title">Ranking de Mãos (Maior para Menor)</h2>
+        <button id="btn-close-rankings" class="close-mini-btn">✕</button>
+      </div>
+      <div id="rankings-list" class="rankings-list"></div>
+    </div>
+  </div>
+
+  <!-- MATCH GAME OVER MODAL -->
+  <div id="gameover-overlay" class="modal-overlay hidden">
+    <div class="menu-card gameover-card">
+      <div id="gameover-icon" class="menu-emblem">🏆</div>
+      <h2 id="gameover-title" class="menu-title">Vitória na Mesa!</h2>
+      <p id="gameover-desc" class="menu-subtitle">Você conquistou todas as fichas da mesa.</p>
+      <div class="menu-footer-btns">
+        <button id="btn-play-again" class="start-game-btn">Jogar Novamente</button>
+        <button id="btn-gameover-menu" class="resume-game-btn">Voltar ao Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
