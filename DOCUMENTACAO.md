@@ -1,6 +1,8 @@
 # Documentação Geral — Pasta `Basepedro`
 
-Esta pasta contém um jogo completo de **Texas Hold'em** feito em **HTML5, CSS3 e JavaScript puro**, sem frameworks, sem bibliotecas externas e sem etapa de build. O mesmo projeto aparece de três formas: **arquivos separados** (`index.html` + `style.css` + `script.js`), **HTMLs autônomos** (todo o CSS e JS embutidos) e um **ZIP** com a versão empacotada.
+Esta pasta contém um jogo completo de **Texas Hold'em** feito em **HTML5, CSS3 e JavaScript puro**. A versão publicável agora usa **Node.js apenas como ferramenta de build/desenvolvimento** (Vite), sem TypeScript, sem backend e sem banco de dados. O resultado do build (`dist/`) é um site estático.
+
+Os arquivos originais (versão de arquivo único, CSS/JS separados e ZIP) foram preservados em `Basepedro/legacy/` para consulta e comparação.
 
 Este documento explica:
 
@@ -16,9 +18,9 @@ Este documento explica:
 |---|---|
 | Nome do jogo | Royal Texas Hold'em |
 | Gênero | Poker Texas Hold'em contra a CPU |
-| Tecnologias | HTML5, CSS3, JavaScript (ES6+) |
-| Dependências | Nenhuma |
-| Build | Não há; basta abrir no navegador |
+| Tecnologias | HTML5, CSS3, JavaScript (ES6+), Vite |
+| Dependências | Vite (somente desenvolvimento) |
+| Build | `npm run build` → `dist/` (site estático) |
 | Idiomas | Português (pt-BR) e Inglês (en) |
 | Modos | `1x1` (Heads-Up) e `4x1` (você + 3 CPUs) |
 | Dificuldades | Fácil, Médio, Difícil |
@@ -32,21 +34,38 @@ O jogo é totalmente **client-side**: não há servidor, banco de dados, login o
 
 ## 2. Inventário de arquivos
 
-| Arquivo | Tamanho aproximado | Tipo | Função |
-|---|---:|---|---|
-| `index.html` | 11,8 KB / 287 linhas | HTML | Estrutura da tela: mesa, assentos, controles, menu e modais. Carrega `style.css` e `script.js`. |
-| `style.css` | 23,1 KB / 1.188 linhas | CSS | Aparência da mesa, cartas 3D, animações, responsividade. |
-| `script.js` | 62,1 KB / 1.704 linhas | JavaScript | Motor do jogo, regras, IA, avaliação de mãos, side pots, sons, i18n e eventos. |
-| `royal-texas-holdem-completo.html` | 97,0 KB / 3.183 linhas | HTML autônomo | Versão com CSS e JS embutidos, funcionalmente igual à versão separada. |
-| `poker_texas_hold_em.html` | 115,0 KB / 3.352 linhas | HTML autônomo | Variante anterior/alternativa, com rodapé e modal de ajuda diferentes. Mesmo motor de jogo. |
-| `royal-texas-holdem-v2.zip` | 23,9 KB | ZIP | Pacote com `index.html`, `style.css`, `script.js` e `README.md` (idênticos aos arquivos separados). |
+| Arquivo | Tipo | Função |
+|---|---|---|
+| `package.json` | Node | Metadados, scripts `dev`, `build` e `preview`, dependências de desenvolvimento |
+| `package-lock.json` | Node | Travamento de versões para `npm ci` no Render |
+| `vite.config.js` | Config | Define `Basepedro` como raiz e `dist/` como saída do build |
+| `render.yaml` | Config | Blueprint do Render: Static Site, build e headers |
+| `.node-version` | Config | Fixa Node 22 no build do Render |
+| `.gitignore` | Config | Ignora `node_modules/`, `dist/`, logs e arquivos locais |
+| `Basepedro/index.html` | HTML | Entrada do Vite; carrega `/src/main.js` |
+| `Basepedro/src/main.js` | JavaScript | Importa o CSS e chama `boot()` |
+| `Basepedro/src/style.css` | CSS | Aparência da mesa, cartas 3D, animações e responsividade |
+| `Basepedro/src/game/engine.js` | JavaScript | Estado, baralho, avaliador de mãos, força pré-flop, draws e side pots |
+| `Basepedro/src/game/ai.js` | JavaScript | Decisão da CPU por dificuldade |
+| `Basepedro/src/game/i18n.js` | JavaScript | Textos em português e inglês |
+| `Basepedro/src/game/audio.js` | JavaScript | Efeitos sonoros via Web Audio |
+| `Basepedro/src/game/ui.js` | JavaScript | Cache do DOM, animações, assentos, modais, log e controles |
+| `Basepedro/src/game/game.js` | JavaScript | Fluxo da partida, apostas, fases, showdown e eventos |
+| `Basepedro/src/game/utils.js` | JavaScript | Utilitário `sleep` |
+| `Basepedro/legacy/` | Legado | `script.js`, `style.css`, HTMLs autônomos e ZIP originais |
+| `DOCUMENTACAO.md` | Doc | Este documento |
 
 ### 2.1 Relação entre os arquivos
 
-- **Versão principal/recomendada:** `index.html` + `style.css` + `script.js`.
-- `royal-texas-holdem-completo.html` é a concatenação da versão principal: CSS no `<style>`, HTML no `<body>` e JS no `<script>`. A comparação normalizada com os três arquivos separados não mostra diferenças de lógica (apenas uma linha em branco extra).
-- `poker_texas_hold_em.html` é uma **variante de interface**: o motor (baralho, avaliador, IA, side pots, fases) é equivalente, mas o rodapé usa `turn-status-pill` em vez de `live-status-text`, e o modal de ajuda tem cartões fixos com IDs e botão "Entendi!" em vez de cartões renderizados dinamicamente.
-- `royal-texas-holdem-v2.zip` contém exatamente os mesmos `index.html`, `style.css` e `script.js` da pasta (hashes SHA-256 conferem), mais o `README.md` descritivo.
+- **Versão principal/recomendada:** projeto Vite em `Basepedro/`, com código modular em `Basepedro/src/`.
+- `Basepedro/index.html` é a entrada; ele carrega `src/main.js`, que por sua vez importa o CSS e o controlador do jogo.
+- O código foi dividido por responsabilidade: regras puras em `engine.js`, IA em `ai.js`, textos em `i18n.js`, som em `audio.js`, DOM/UI em `ui.js` e fluxo da partida em `game.js`.
+- `Basepedro/legacy/` preserva os arquivos originais:
+  - `script.js` e `style.css`: versão anterior de arquivo separado.
+  - `royal-texas-holdem-completo.html`: HTML com CSS/JS embutidos, equivalente à versão antiga.
+  - `poker_texas_hold_em.html`: variante de interface com rodapé/modal de ajuda diferentes.
+  - `royal-texas-holdem-v2.zip`: pacote da versão antiga com README.
+- Os arquivos de `legacy/` **não entram no build** do Vite. Eles servem como referência histórica.
 
 ---
 
@@ -54,34 +73,34 @@ O jogo é totalmente **client-side**: não há servidor, banco de dados, login o
 
 ### 3.1 Execução
 
-Não é necessário instalar nada.
-
-**Versão separada (recomendada):**
-
-1. Abra a pasta `Basepedro`.
-2. Dê duplo clique em `index.html`.
-3. O jogo abre no navegador padrão.
-
-**Versão em arquivo único:**
-
-- Abra `royal-texas-holdem-completo.html` ou `poker_texas_hold_em.html` diretamente.
-
-**Opcional — servidor local** (não obrigatório, pois não há `fetch` nem módulos ES):
+**Desenvolvimento:**
 
 ```bash
-cd Basepedro
-python -m http.server 8000
-# abra http://localhost:8000
+npm install
+npm run dev
+# abra a URL exibida pelo Vite
 ```
 
-**ZIP:**
+**Build de produção:**
 
 ```bash
-unzip royal-texas-holdem-v2.zip -d royal-holdem
-# abra royal-holdem/index.html
+npm run build
+npm run preview
+# o build fica em dist/
 ```
 
-Requisitos: navegador moderno (Chrome, Edge, Firefox ou Safari). O som usa Web Audio API e só começa após uma interação do usuário, conforme a política de autoplay dos navegadores.
+**Publicação no Render (Static Site):**
+
+- Build Command: `npm ci --include=dev && npm run build`
+- Publish Directory: `dist`
+- O `render.yaml` já contém essa configuração.
+
+**Versões legadas (não fazem parte do build):**
+
+- Abra `Basepedro/legacy/royal-texas-holdem-completo.html` ou `Basepedro/legacy/poker_texas_hold_em.html` diretamente.
+- O ZIP está em `Basepedro/legacy/royal-texas-holdem-v2.zip`.
+
+Requisitos: Node 22+ para desenvolvimento/build e navegador moderno (Chrome, Edge, Firefox ou Safari) para jogar. O som usa Web Audio API e só começa após uma interação do usuário, conforme a política de autoplay dos navegadores.
 
 ### 3.2 Fluxo de uso
 
@@ -130,31 +149,41 @@ Requisitos: navegador moderno (Chrome, Edge, Firefox ou Safari). O som usa Web A
 
 ---
 
-## 4. Arquitetura do código (`script.js`)
+## 4. Arquitetura do código
 
-O `script.js` inteiro é uma **IIFE** (`(() => { ... })()`) em modo estrito. Isso encapsula tudo e evita variáveis globais. A organização interna é:
+A versão Vite mantém a mesma lógica da versão original, agora distribuída em módulos ES:
 
 ```
-1. I18N                    → textos em pt/en
-2. SoundFX                 → efeitos sonoros via Web Audio
-3. Utilidades de baralho   → SUITS, RANKS, createShuffledDeck
-4. Avaliador de mãos       → evaluateFiveCards, evaluateBestHand
-5. state                   → estado global da partida
-6. dom                     → cache de elementos do HTML
-7. Animações               → animateNumber, spawnFlyingChips, cartas
-8. UI/idioma               → applyLanguage, modais, log, assentos
-9. Ciclo da partida        → startNewMatch, startNextHand, blinds
-10. Rodada de apostas      → isBettingRoundComplete, runTurnLoop, applyPlayerAction
-11. Fases                  → advancePhase
-12. Side pots/showdown     → calculateSidePots, resolveShowdown
-13. IA                     → evaluatePreflopStrength, computeCpuDecision
-14. Controles humanos      → updateControlsUI, handleHumanAction
-15. Eventos                → bindEvents
+Basepedro/src/
+  main.js          → importa style.css e chama boot()
+  game/
+    engine.js      → state, baralho, avaliador, força pré-flop, draws, side pots
+    ai.js          → computeCpuDecision
+    i18n.js        → I18N (pt/en)
+    audio.js       → SoundFX + instância sfx
+    ui.js          → dom, animações, assentos, modais, log, controles
+    game.js        → fluxo da partida, apostas, fases, showdown, eventos
+    utils.js       → sleep
 ```
+
+Dependências:
+
+```
+main.js
+  └─ game.js
+       ├─ engine.js
+       ├─ ai.js ──────────┐
+       ├─ i18n.js         │
+       ├─ audio.js        │
+       ├─ utils.js        │
+       └─ ui.js ──────────┘
+```
+
+O detalhamento abaixo usa como referência os números de linha do código original em `Basepedro/legacy/script.js`. A versão modular preserva as mesmas funções e regras.
 
 ### 4.1 Estado global (`state`)
 
-Definido em `script.js:488`, concentra toda a partida:
+Definido em `Basepedro/src/game/engine.js`, concentra toda a partida:
 
 ```js
 const state = {
@@ -201,18 +230,18 @@ Cada jogador em `state.players` tem:
 
 ### 4.2 Cache de DOM (`dom`)
 
-Definido em `script.js:512`, guarda referências aos elementos usados com frequência (`menuOverlay`, `potAmount`, `betSlider`, botões etc.) para evitar consultas repetidas ao DOM.
+Definido em `Basepedro/src/game/ui.js`, guarda referências aos elementos usados com frequência (`menuOverlay`, `potAmount`, `betSlider`, botões etc.) para evitar consultas repetidas ao DOM.
 
 ---
 
 ## 5. `index.html` — estrutura da tela
 
-### 5.1 Cabeçalho (`index.html:11-35`)
+### 5.1 Cabeçalho (`Basepedro/index.html:10-34`)
 
 - `.brand`: logotipo com `♠`, título e badge do modo (`1x1 • MÉDIO`).
 - Botões: histórico (`btn-log-toggle`), ranking (`btn-rankings`), som (`btn-sound`) e menu (`btn-open-menu`).
 
-### 5.2 Arena e mesa (`index.html:38-154`)
+### 5.2 Arena e mesa (`Basepedro/index.html:37-153`)
 
 - `#poker-table`: mesa com feltro decorado (`felt-inner-ring`, marca d'água e blinds).
 - `#deck-pile`: pilha visual de cartas (três camadas).
@@ -227,11 +256,11 @@ Definido em `script.js:512`, guarda referências aos elementos usados com frequ�
 - `#fx-layer`: camada para fichas animadas.
 - `#round-result-banner`: aviso de resultado da mão.
 
-### 5.3 Drawer de histórico (`index.html:147-153`)
+### 5.3 Drawer de histórico (`Basepedro/index.html:146-152`)
 
 Painel lateral com lista `#action-log-list`, aberto/fechado pelo botão de histórico.
 
-### 5.4 Rodapé de controles (`index.html:157-188`)
+### 5.4 Rodapé de controles (`Basepedro/index.html:156-187`)
 
 - `#live-status-text`: texto de status em tempo real.
 - `#btn-action-help`: abre o guia "Passar vs Aumentar".
@@ -240,7 +269,7 @@ Painel lateral com lista `#action-log-list`, aberto/fechado pelo botão de hist�
 - Slider `#bet-slider` e valor `#bet-slider-val`.
 - Botões de ação: `#btn-fold`, `#btn-check-call`, `#btn-bet-raise`.
 
-### 5.5 Menu inicial (`index.html:191-245`)
+### 5.5 Menu inicial (`Basepedro/index.html:190-244`)
 
 Overlay com:
 - Seletor de idioma (`#lang-selector`).
@@ -252,13 +281,13 @@ Overlay com:
 
 | Modal | Linhas | Conteúdo |
 |---|---|---|
-| Ajuda de ações (`#help-overlay`) | 248-259 | Contexto ao vivo + grade de cartões gerada por JS |
-| Ranking de mãos (`#rankings-overlay`) | 262-270 | Lista das 10 mãos, gerada por JS |
-| Fim de jogo (`#gameover-overlay`) | 273-283 | Vitória/derrota + botões de reinício/menu |
+| Ajuda de ações (`#help-overlay`) | 247-258 | Contexto ao vivo + grade de cartões gerada por JS |
+| Ranking de mãos (`#rankings-overlay`) | 261-269 | Lista das 10 mãos, gerada por JS |
+| Fim de jogo (`#gameover-overlay`) | 272-282 | Vitória/derrota + botões de reinício/menu |
 
 ---
 
-## 6. `style.css` — aparência e animações
+## 6. `Basepedro/src/style.css` — aparência e animações
 
 ### 6.1 Variáveis globais (`style.css:5-19`)
 
@@ -316,7 +345,9 @@ Alterar essas variáveis muda rapidamente o tema, o tamanho das cartas e as core
 
 ---
 
-## 7. `script.js` — detalhamento por bloco
+## 7. Código original — detalhamento por bloco
+
+> Os números de linha abaixo referem-se ao código original em `Basepedro/legacy/script.js`. Na versão modular, a lógica equivalente está em `Basepedro/src/game/`: `i18n.js`, `audio.js`, `engine.js`, `ai.js`, `ui.js` e `game.js`.
 
 ### 7.1 Internacionalização — `I18N` (`script.js:9-274`)
 
@@ -579,7 +610,7 @@ Liga:
 - Slider, presets e botões de ação.
 - Reposicionamento do dealer no `resize`.
 
-No fim do arquivo, `bindEvents()` e `applyLanguage()` são chamados uma vez.
+No código original, `bindEvents()` e `applyLanguage()` são chamados uma vez. Na versão modular, `boot()` em `game.js` faz essas duas chamadas.
 
 ---
 
@@ -604,7 +635,9 @@ startNewMatch()
 
 ---
 
-## 9. Diferenças entre as versões HTML
+## 9. Diferenças entre as versões HTML (legado)
+
+> Os três arquivos abaixo estão em `Basepedro/legacy/` e não fazem parte do build Vite.
 
 ### 9.1 `royal-texas-holdem-completo.html`
 
@@ -625,9 +658,9 @@ startNewMatch()
 
 ### 9.3 `royal-texas-holdem-v2.zip`
 
-- Pacote da versão separada.
+- Pacote da versão antiga de arquivo separado.
 - Contém `README.md` com a descrição do projeto.
-- Os três arquivos de código são idênticos aos da pasta.
+- Os três arquivos de código são idênticos aos originais preservados em `Basepedro/legacy/`.
 
 ---
 
@@ -635,30 +668,30 @@ startNewMatch()
 
 | O que mudar | Onde |
 |---|---|
-| Fichas iniciais | `script.js:882-890` (`stack: 1000`) e `script.js:894` (`displayedValues`) |
-| Small/big blind | `script.js:494-495` e `script.js:875-876` |
-| Nomes das CPUs | `script.js:883-890` |
-| Tempo de "pensamento" da CPU | `script.js:1092` (`620`, `780`, `920`) |
-| Comportamento da IA | `script.js:1402-1498` |
-| Textos/idiomas | Objeto `I18N` em `script.js:9-274` |
-| Quantidade de entradas do log | `script.js:786` (`> 45`) |
-| Duração das animações | `script.js:553` (números), `648` (carta), `1287`/`1396` (espera entre mãos) |
-| Cores e tamanhos das cartas | Variáveis em `style.css:5-19` |
-| Ajustes mobile | `style.css:1164-1188` |
-| Layout do HTML | `index.html` |
-| Ordem/nomes dos assentos | `index.html:80-134` + `script.js:880-891` |
-| Novos presets de aposta | `index.html:170-175` + `script.js:1666-1683` |
+| Fichas iniciais | `Basepedro/src/game/game.js` (`startNewMatch`) e `engine.js` (`displayedValues`) |
+| Small/big blind | `Basepedro/src/game/game.js` e `engine.js` (`state`) |
+| Nomes das CPUs | `Basepedro/src/game/game.js` (`startNewMatch`) |
+| Tempo de "pensamento" da CPU | `Basepedro/src/game/game.js` (`runTurnLoop`) |
+| Comportamento da IA | `Basepedro/src/game/ai.js` + `engine.js` |
+| Textos/idiomas | Objeto `I18N` em `Basepedro/src/game/i18n.js` |
+| Quantidade de entradas do log | `Basepedro/src/game/ui.js` (`addLog`) |
+| Duração das animações | `Basepedro/src/game/ui.js` (`animateNumber`, `dealCardWithTrajectory`) e `game.js` (espera entre mãos) |
+| Cores e tamanhos das cartas | Variáveis em `Basepedro/src/style.css:5-19` |
+| Ajustes mobile | `Basepedro/src/style.css` (seção responsiva) |
+| Layout do HTML | `Basepedro/index.html` |
+| Ordem/nomes dos assentos | `Basepedro/index.html` + `Basepedro/src/game/game.js` |
+| Novos presets de aposta | `Basepedro/index.html` + `Basepedro/src/game/game.js` (`bindEvents`) |
 
 ### 10.1 Adicionar um idioma
 
-1. Copie o bloco `pt` ou `en` em `I18N` (`script.js:9-274`).
+1. Copie o bloco `pt` ou `en` em `I18N` (`Basepedro/src/game/i18n.js`).
 2. Traduza as chaves e registre o novo código (ex.: `es`).
-3. Adicione um botão em `#lang-selector` (`index.html:200-203`) com `data-lang="es"`.
+3. Adicione um botão em `#lang-selector` (`Basepedro/index.html`) com `data-lang="es"`.
 4. Nenhuma alteração extra é necessária: `applyLanguage()` percorre o dicionário escolhido.
 
 ### 10.2 Ajustar a dificuldade
 
-As decisões ficam em `computeCpuDecision` (`script.js:1429`). Para deixar a CPU mais agressiva, aumente as probabilidades (`rng < ...`) e reduza os limiares de força. Para deixá-la mais passiva, faça o contrário. A força pré-flop vem de `evaluatePreflopStrength` e a pós-flop de `evaluateBestHand`.
+As decisões ficam em `computeCpuDecision` (`Basepedro/src/game/ai.js`). Para deixar a CPU mais agressiva, aumente as probabilidades (`rng < ...`) e reduza os limiares de força. Para deixá-la mais passiva, faça o contrário. A força pré-flop vem de `evaluatePreflopStrength` e a pós-flop de `evaluateBestHand`, ambas em `engine.js`.
 
 ---
 
@@ -698,7 +731,9 @@ As decisões ficam em `computeCpuDecision` (`script.js:1429`). Para deixar a CPU
 
 ---
 
-## 13. Referência rápida de funções (`script.js`)
+## 13. Referência rápida de funções (código original)
+
+> Linhas de `Basepedro/legacy/script.js`. Na versão modular, consulte os arquivos indicados na seção 4.
 
 | Linha | Função | Responsabilidade |
 |---:|---|---|
@@ -784,4 +819,4 @@ As decisões ficam em `computeCpuDecision` (`script.js:1429`). Para deixar a CPU
 
 ## 15. Conclusão
 
-A pasta `Basepedro` entrega um Texas Hold'em completo e autossuficiente. A versão separada (`index.html` + `style.css` + `script.js`) é a mais indicada para manutenção e estudo; as versões autônomas servem para distribuição em arquivo único, e o ZIP empacota a versão principal com README. O código é organizado por responsabilidades, com estado centralizado, motor de regras próprio, IA heurística, side pots e uma camada visual rica em animações.
+A pasta `Basepedro` entrega um Texas Hold'em completo e autossuficiente, agora estruturado como projeto Node/Vite sem TypeScript e publicado como site estático. O código-fonte fica em `Basepedro/src/`, o build em `dist/` e os arquivos originais em `Basepedro/legacy/`. O jogo mantém estado centralizado, motor de regras próprio, IA heurística, side pots e uma camada visual rica em animações.

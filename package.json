@@ -1,0 +1,18 @@
+{
+  "name": "royal-texas-holdem",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Texas Hold'em contra IA em HTML, CSS e JavaScript, construído com Vite.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  }
+}
